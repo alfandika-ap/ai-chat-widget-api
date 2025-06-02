@@ -1,7 +1,7 @@
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.dependencies_auth import get_current_user
-from app.routers import auth, chat, preview
+from app.routers import agent_chat, auth, chat, preview
 from app.database import engine
 from app import models
 
@@ -35,6 +35,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(chat.router)
 app.include_router(preview.router)
+app.include_router(agent_chat.router)
 
 @app.get("/")
 def root():

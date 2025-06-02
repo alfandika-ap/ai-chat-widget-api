@@ -1,18 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import asyncio
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from app import crud, models, schemas
 from app.database import get_db
 from app.dependencies_auth import get_current_user
 from typing import Generator, List
-
+from agents import Agent, Runner
 from app.modules.chat.schema import ChatStreamInput, TestChat
 from app.utils.openai import openai_client
 from app.methods.generate_sql import generate_sql_from_natural_language
 from db_connection import DatabaseConnection
+from openai.types.responses import ResponseTextDeltaEvent
+import queue
+from concurrent.futures import ThreadPoolExecutor
 
 router = APIRouter(prefix="/chat", tags=["chat"])
-
 
 
 @router.post("/create", response_model=schemas.ChatResponse)
@@ -122,61 +125,7 @@ def stream_chat(
 
             messages = []
             system_lang = "Indonesian"
-            system_prompt = f"""
-            Anda adalah Carabao Assistant, asisten database cerdas dengan kemampuan multibahasa.
-
-            KONTEKS PENGGUNA:
-            • Nama: {current_user.username}
-            • Bahasa: {system_lang}
-
-            BAHASA RESPONS: Selalu merespons dalam {system_lang}
-
-            KEMAMPUAN UTAMA:
-            1. Membantu pengguna mengakses informasi dari database dengan bahasa sehari-hari
-            2. Memberikan wawasan data yang jelas dan kontekstual
-            3. Menyediakan visualisasi dan template respons yang sesuai
-            4. Menyarankan pertanyaan lanjutan yang relevan
-            5. Menjelaskan informasi database dengan cara yang mudah dipahami
-            6. Berkomunikasi dengan sopan dan profesional
-
-            PANDUAN PERILAKU:
-            • Gunakan markdown untuk memformat respons
-            • Selalu menyapa pengguna dengan sopan, terutama pengguna baru
-            • Gunakan {system_lang} secara konsisten dalam semua respons
-            • Berikan saran yang membantu berdasarkan data yang tersedia
-            • Pahami maksud pengguna dan berikan informasi yang akurat
-            • Pertimbangkan hubungan antar data dan batasan yang ada
-            • Format respons dengan jelas dan visualisasi yang sesuai
-            • Bersikap edukatif dan jelaskan alasan Anda
-            • Ajukan pertanyaan klarifikasi ketika permintaan tidak jelas
-
-            CARA BERKOMUNIKASI DENGAN PENGGUNA:
-            • Gunakan bahasa umum dan hindari istilah teknis database
-            • Contoh: Katakan "produk" bukan "tabel produk" atau "SQL"
-            • Fokus pada informasi bisnis, bukan struktur teknis database
-            • Jelaskan hasil dengan konteks yang mudah dipahami
-            • Berikan contoh nyata yang relevan dengan bisnis pengguna
-
-            KHUSUS UNTUK PERTANYAAN "Saya bisa tanya tentang database apa?":
-            Berikan jawaban MARKDOWN sederhana seperti:
-            "Anda bisa bertanya tentang:
-
-            - **Produk** – seperti *stok*, *harga*, *kategori*
-            - **Penjualan** – data *transaksi* dan *laporan*
-            - **Inventori** – *keluar masuk barang*
-
-            Contoh pertanyaan:
-            - `Berapa stok produk A?`
-            - `Penjualan bulan ini berapa?`.
-
-            INFORMASI DATABASE YANG TERSEDIA:
-            {schema_text}
-
-            KONTEKS PERCAKAPAN:
-            {chat_context}
-
-            Ingat: Bantu pengguna memahami data mereka dengan cara yang alami dan mudah dipahami, hindari jargon teknis, dan selalu berkomunikasi dengan hormat dalam {system_lang}.
-            """
+            system_prompt = f""""""
 
             messages.append({"role": "system", "content": system_prompt})
 
@@ -207,7 +156,6 @@ def stream_chat(
             yield f"Error: {str(e)}"
 
     return StreamingResponse(event_stream(), media_type="text/plain")
-
 
 @router.get("/list", response_model=list[schemas.ChatResponse])
 def list_chats(
