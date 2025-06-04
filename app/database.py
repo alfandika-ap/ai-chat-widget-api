@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 # Sesuaikan dengan konfigurasi container PostgreSQL Anda
-SQLALCHEMY_DATABASE_URL = "postgresql://user:user123@127.0.0.1:5432/carabao_ai"
+SQLALCHEMY_DATABASE_URL = "postgresql://user:user123@127.0.0.1:5433/carabao_ai"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

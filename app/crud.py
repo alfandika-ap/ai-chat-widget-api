@@ -12,7 +12,8 @@ def create_user(db: Session, user: schemas.UserCreate):
     db_user = models.User(
         email=user.email,
         username=user.username,
-        hashed_password=hashed_password
+        hashed_password=hashed_password,
+        full_name=user.full_name
     )
     db.add(db_user)
     db.commit()

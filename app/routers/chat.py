@@ -8,7 +8,7 @@ from app.dependencies_auth import get_current_user
 from typing import Generator, List
 from agents import Agent, Runner
 from app.modules.chat.schema import ChatStreamInput, TestChat
-from app.utils.openai import openai_client
+from app.utils.openai import get_openai_client
 from app.methods.generate_sql import generate_sql_from_natural_language
 from db_connection import DatabaseConnection
 from openai.types.responses import ResponseTextDeltaEvent
@@ -26,8 +26,8 @@ def create_chat(
 ):
     return crud.create_chat(db=db, chat=chat, user_id=current_user.id)
 
-@router.post("/create-chat")
-def create_chat(
+@router.post("/create-chat-sql")
+def create_chat_sql(
     chat: TestChat,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
@@ -51,10 +51,7 @@ def create_chat(
         db.refresh(query_store)
         
         return {
-            "user": current_user,
-            "chat": chat,
-            "sql_result": sql_result,
-            "query_store_id": query_store.id
+            "query_id": query_store.id
         }
         
     except Exception as e:
@@ -137,8 +134,9 @@ def stream_chat(
             # Simpan pesan user
             crud.create_chat(db=db, chat=schemas.ChatCreate(type="user", content=chat.query), user_id=current_user.id)
 
+            openai_client = get_openai_client()
             response = openai_client.chat.completions.create(
-                model="gpt-4",
+                model="gpt-4o-mini",
                 messages=messages,
                 stream=True
             )

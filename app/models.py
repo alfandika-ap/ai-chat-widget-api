@@ -4,10 +4,26 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey
 from app.database import Base
 
+# Untuk menjalankan migrasi dengan Alembic, ikuti langkah-langkah berikut:
+
+# 1. Inisialisasi Alembic (jika belum):
+# alembic init alembic
+
+# 2. Buat file migrasi baru:
+# alembic revision --autogenerate -m "deskripsi perubahan"
+
+# 3. Jalankan migrasi:
+# alembic upgrade head
+
+# 4. Untuk rollback migrasi:
+# alembic downgrade -1  # rollback 1 versi
+# alembic downgrade base  # rollback ke awal
+
 class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)

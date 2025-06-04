@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: carabao_ai
+    environment:
+      POSTGRES_DB: carabao_ai
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user123
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+    external: false

@@ -43,7 +43,7 @@ def inject_limit_offset(sql: str, limit: int, offset: int) -> str:
 def preview_data(
     query_id: int,
     page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1),
+    limit: int = Query(10, ge=1),
     db: Session = Depends(get_db)
 ):
     # Get query details from SQLAlchemy

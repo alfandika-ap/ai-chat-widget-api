@@ -4,6 +4,7 @@ from typing import Optional
 
 # Schema untuk registrasi
 class UserCreate(BaseModel):
+    full_name: str
     email: EmailStr
     username: str
     password: str

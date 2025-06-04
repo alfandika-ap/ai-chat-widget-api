@@ -64,6 +64,44 @@ class DatabaseConnection:
         finally:
             if cursor:
                 cursor.close()
+    
+    def get_schema_text(self):
+        schema_sections = []
+        schema_info = self.get_schema()
+
+        for table_name, columns in schema_info.items():
+            column_details = []
+            date_columns = []
+            numeric_columns = []
+            text_columns = []
+            
+            for col in columns:
+                col_info = f"{col['Field']} ({col['Type']}"
+                if col.get('Key') == 'PRI':
+                    col_info += ", PRIMARY KEY"
+                if col.get('Key') == 'UNI':
+                    col_info += ", UNIQUE"
+                if col.get('Null') == 'NO':
+                    col_info += ", NOT NULL"
+                if col.get('Default'):
+                    col_info += f", DEFAULT: {col['Default']}"
+                col_info += ")"
+                column_details.append(f"    • {col_info}")
+                
+                # Categorize columns for smart suggestions
+                col_type = col['Type'].lower()
+                col_name = col['Field'].lower()
+                
+                if any(date_word in col_type for date_word in ['date', 'time', 'timestamp']):
+                    date_columns.append(col['Field'])
+                elif any(num_word in col_type for num_word in ['int', 'decimal', 'float', 'double', 'numeric']):
+                    numeric_columns.append(col['Field'])
+                elif any(text_word in col_type for text_word in ['varchar', 'text', 'char']):
+                    text_columns.append(col['Field'])
+            
+            schema_sections.append(f"  {table_name}:\n" + "\n".join(column_details))
+        schema_text = "DATABASE SCHEMA:\n" + "\n\n".join(schema_sections)
+        return schema_text
 
     def execute_query(self, query: str) -> List[Dict[str, Any]]:
         """Execute a SELECT query and return results"""

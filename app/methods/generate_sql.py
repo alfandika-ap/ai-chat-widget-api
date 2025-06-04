@@ -1,4 +1,4 @@
-from app.utils.openai import openai_client
+from app.utils.openai import get_openai_client
 import datetime
 from db_connection import DatabaseConnection
 import json
@@ -43,8 +43,9 @@ Berikan response untuk pertanyaan berikut dalam format JSON yang valid:
 """
 
     try:
+        openai_client = get_openai_client()
         response = openai_client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o-mini",
             messages=[
                 {
                     "role": "system", 

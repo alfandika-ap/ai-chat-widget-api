@@ -6,10 +6,9 @@ from openai import OpenAI
 
 load_dotenv()
 
-API_KEY = os.getenv("OPENAI_API_KEY")
-
-openai_client = OpenAI(api_key=API_KEY)
-
+def get_openai_client():
+    """Get OpenAI client with fresh environment variables"""
+    return OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class PromptManager:
     def __init__(self, model="gpt-4o-mini", messages=[]):
@@ -39,6 +38,7 @@ class PromptManager:
             kwargs["tools"] = [{"type": "function", "function": f} for f in functions]
             kwargs["tool_choice"] = "auto"  # penting agar model bisa memilih
 
+        openai_client = get_openai_client()
         response = openai_client.chat.completions.create(**kwargs)
 
         if stream:
@@ -58,6 +58,7 @@ class PromptManager:
                 return ""
 
     def generate_structured(self, schema):
+        openai_client = get_openai_client()
         response = openai_client.beta.chat.completions.parse(
             model=self.model, messages=self.messages, response_format=schema
         )
@@ -73,6 +74,7 @@ class PromptManager:
             "parameters": schema.model_json_schema()
         }
 
+        openai_client = get_openai_client()
         response = openai_client.chat.completions.create(
             model=self.model,
             messages=self.messages,
