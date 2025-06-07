@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from app.models.query_store import QueryStore
 from app.models.user import User
 from app.schemas.chat import ChatCreate
-from app.repositories.chat_repository import create_chat, get_all_chats_by_user, get_last_chats_by_user
+from app.repositories.chat_repository import create_chat, delete_all_chats_by_user, get_all_chats_by_user, get_last_chats_by_user
 from app.utils.generate_sql import generate_sql_from_natural_language
 from app.utils.templates.chat_system_prompt import chat_system_prompt_template
 from db_connection import DatabaseConnection
@@ -28,6 +28,9 @@ class AgentService:
     
     def get_all_chats_by_user(self, user_id: int):
         return get_all_chats_by_user(self.db, user_id)
+    
+    def delete_all_chats_by_user(self, user_id: int):
+        return delete_all_chats_by_user(self.db, user_id)
 
     def create_stream_event(self, event_type: str, content: Any = None, **kwargs) -> str:
         """Helper function untuk membuat NDJSON event"""

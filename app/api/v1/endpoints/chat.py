@@ -7,7 +7,7 @@ from app.models.user import User
 from app.schemas.chat import ChatResponse, ChatStreamInput
 from app.services.agent_service import AgentService
 
-router = APIRouter(prefix="/agent-chat", tags=["agent-chat"])
+router = APIRouter(prefix="/chat", tags=["chat"])
 
 @router.post("/stream")
 def stream_chat_agents_background(
@@ -38,3 +38,12 @@ def list_chats(
     agent_service = AgentService(db, current_user)
     chats = agent_service.get_all_chats_by_user(current_user.id)
     return chats
+
+@router.post("/clear-chat")
+def clear_chat(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    agent_service = AgentService(db, current_user)
+    agent_service.delete_all_chats_by_user(current_user.id)
+    return {"message": "Chat history cleared successfully"}
