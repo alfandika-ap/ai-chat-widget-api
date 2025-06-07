@@ -1,8 +1,8 @@
-from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional
+from pydantic import BaseModel, EmailStr
 
-# Schema untuk registrasi
+
 class UserCreate(BaseModel):
     full_name: str
     email: EmailStr
@@ -26,23 +26,9 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
-# Schema untuk token
 class Token(BaseModel):
     access_token: str
     token_type: str
 
 class TokenData(BaseModel):
     username: Optional[str] = None
-
-class ChatCreate(BaseModel):
-    type: str
-    content: str
-
-class ChatResponse(BaseModel):
-    id: int
-    type: str
-    content: str
-    user_id: int
-
-    class Config:
-        orm_mode = True

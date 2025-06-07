@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
-from app.database import get_db
-from app import models
+from app.core.database import get_db
+from app.models.query_store import QueryStore
 from db_connection import DatabaseConnection
 import re
 
@@ -47,7 +47,7 @@ def preview_data(
     db: Session = Depends(get_db)
 ):
     # Get query details from SQLAlchemy
-    query_store = db.query(models.QueryStore).filter(models.QueryStore.id == query_id).first()
+    query_store = db.query(QueryStore).filter(QueryStore.id == query_id).first()
     if not query_store:
         raise HTTPException(status_code=404, detail="Query not found")
 

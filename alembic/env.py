@@ -1,3 +1,4 @@
+import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -13,6 +14,21 @@ config = context.config
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+
+# Support for environment variables
+# Construct database URL from separate environment variables
+if any(os.getenv(var) for var in ["DB_HOST", "DB_USER", "DB_PASSWORD", "DB_NAME"]):
+    db_host = os.getenv("DB_HOST", "localhost")
+    db_port = os.getenv("DB_PORT", "5433")
+    db_user = os.getenv("DB_USER", "user")
+    db_password = os.getenv("DB_PASSWORD", "user123")
+    db_name = os.getenv("DB_NAME", "carabao_ai")
+    
+    database_url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    config.set_main_option("sqlalchemy.url", database_url)
+elif os.getenv("DATABASE_URL"):
+    # Fallback to DATABASE_URL if separate variables are not set
+    config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
 
 # add your model's MetaData object here
 # for 'autogenerate' support

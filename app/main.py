@@ -1,16 +1,17 @@
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.dependencies_auth import get_current_user
-from app.routers import agent_chat, auth, chat, preview
-from app.database import engine
-from app import models
+from app.api.v1.api import api_router
+from app.core.database import engine
+from app.core.database import Base
+from app.models.user import User
 
 # Create database tables
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="FastAPI Authentication System",
-    description="Simple authentication system with FastAPI",
+    title="AI SQL Assistant",
+    description="AI SQL Assistant",
     version="1.0.0"
 )
 
@@ -31,16 +32,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(auth.router)
-app.include_router(chat.router)
-app.include_router(preview.router)
-app.include_router(agent_chat.router)
+# Include API router with v1 prefix
+app.include_router(api_router, prefix="/api/v1")
 
 @app.get("/")
 def root():
     return {"message": "FastAPI Authentication System"}
 
 @app.get("/protected")
-def protected_route(current_user: models.User = Depends(get_current_user)):
+def protected_route(current_user: User = Depends(get_current_user)):
     return {"message": f"Hello {current_user.username}, this is a protected route!"}

@@ -5,8 +5,9 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from app import crud, schemas
-from app.database import get_db
+from app.core.database import get_db
+from app.repositories.user_repository import get_user_by_username
+from app.schemas.user import TokenData
 
 # Konfigurasi
 SECRET_KEY = "your-secret-key-here"  # Ganti dengan secret key yang aman
@@ -38,7 +39,7 @@ def verify_token(token: str, credentials_exception):
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-        token_data = schemas.TokenData(username=username)
+        token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
     return token_data
@@ -50,7 +51,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         headers={"WWW-Authenticate": "Bearer"},
     )
     token_data = verify_token(token, credentials_exception)
-    user = crud.get_user_by_username(db, username=token_data.username)
+    user = get_user_by_username(db, username=token_data.username)
     if user is None:
         raise credentials_exception
     return user
